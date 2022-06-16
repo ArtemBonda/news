@@ -15,23 +15,27 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	tpl.Execute(w, nil)
 }
 
-func SearchHandler(w http.ResponseWriter, r *http.Request) {
-	rawURL, err := url.Parse(r.URL.String())
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-
-	params := rawURL.Query()
-	searchQuery := params.Get("q")
-	page := params.Get("page")
-	if page == "" {
-		page = "1"
-	}
-
-	fmt.Println("Search Query is: ", searchQuery)
-	fmt.Println("Page is: ", page)
-}
 func SearchMiddleware(newsapi *news.Client) http.HandlerFunc {
-	return SearchHandler
+	return func(w http.ResponseWriter, r *http.Request) {
+		rawURL, err := url.Parse(r.URL.String())
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		params := rawURL.Query()
+		searchQuery := params.Get("q")
+		page := params.Get("page")
+		if page == "" {
+			page = "1"
+		}
+
+		results, err := newsapi.FetchEverything(searchQuery, page)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		fmt.Printf("%+v", results)
+
+	}
 }
