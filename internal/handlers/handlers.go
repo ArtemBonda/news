@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+
+	"github.com/ArtemBonda/news/internal/news"
 )
 
 var tpl = template.Must(template.ParseFiles("templates/index.html"))
@@ -29,4 +31,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Search Query is: ", searchQuery)
 	fmt.Println("Page is: ", page)
+}
+func SearchMiddleware(newsapi *news.Client) http.HandlerFunc {
+	return SearchHandler
 }
