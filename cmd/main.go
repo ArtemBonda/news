@@ -15,12 +15,16 @@ func main() {
 	if err != nil {
 		log.Println("Error loading .env file")
 	}
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", handlers.IndexHandler)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
+
+	fs := http.FileServer(http.Dir("assets"))
+	mux := http.NewServeMux()
+	mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
+	mux.HandleFunc("/", handlers.IndexHandler)
 
 	log.Fatalln(http.ListenAndServe(":"+port, mux))
 }
